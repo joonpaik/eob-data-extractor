@@ -7,134 +7,67 @@ Prerequisites
 - System dependencies for PDF processing
 
 
-System Dependencies
-macOS:
-bash# Install libmagic for file type detection
+# System Dependencies
+macOS: 
+
+```bash
+# Install libmagic for file type detection
 brew install libmagic
 
 # For PDF processing (if needed)
 brew install poppler
+```
 Ubuntu/Debian:
+
+```bash
 bashsudo apt-get update
 sudo apt-get install libmagic1 libmagic-dev
-sudo apt-get install poppler-utils  # For PDF processing
-Windows:
-bash# Install using conda (recommended for Windows)
+sudo apt-get install poppler-utils 
+```
+Windows: Install using conda (recommended for Windows)
+```bash
 conda install -c conda-forge libmagic
-# Or download libmagic binaries and add to PATH
+```
+Or download libmagic binaries and add to PATH
 
-
-Installation
-Quick Start
-
-Clone and setup:
+## Installation
+### Quick Start
+```bash
 git clone <repository-url>
 cd eob-data-extractor
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-Configure environment:
-bash# Create .env file with your Google API key
+```
+### Configure Environment
+```bash
+# Create .env file with your Google API key
 echo "GOOGLE_API_KEY=your_actual_api_key_here" > .env
+```
 
-# Run the command
-python extract_eob.py --file <file-name>
+### Run The Extractor
+```bash
+python extract_eob.py --file <path/to/file>
+```
 
-Test the setup:
+### Test the setup
+```bash
 python test_extract_eob.py
+```
 
+## Getting Google API Key
+- Go to Google AI Studio
+- Sign in with your Google account
+- Click "Create API Key"
+- Copy the generated key to your .env file
 
-Requirements.txt
-Create a requirements.txt file with the following dependencies:
-txtaiohappyeyeballs==2.6.1
-aiohttp==3.12.15
-aiosignal==1.4.0
-annotated-types==0.7.0
-anyio==4.10.0
-attrs==25.3.0
-cachetools==5.5.2
-certifi==2025.8.3
-cffi==1.17.1
-charset-normalizer==3.4.3
-click==8.2.1
-colorama==0.4.6
-cryptography==45.0.7
-dataclasses-json==0.6.7
-filetype==1.2.0
-frozenlist==1.7.0
-google-ai-generativelanguage==0.6.15
-google-api-core==2.25.1
-google-api-python-client==2.181.0
-google-auth==2.40.3
-google-auth-httplib2==0.2.0
-google-auth-oauthlib==1.2.2
-google-generativeai==0.8.5
-googleapis-common-protos==1.70.0
-grpcio==1.74.0
-grpcio-status==1.71.2
-h11==0.16.0
-httpcore==1.0.9
-httplib2==0.30.0
-httpx==0.28.1
-httpx-sse==0.4.1
-idna==3.10
-iniconfig==2.1.0
-jsonpatch==1.33
-jsonpointer==3.0.0
-jsonschema==4.25.1
-jsonschema-specifications==2025.4.1
-langchain==0.3.27
-langchain-community==0.3.29
-langchain-core==0.3.75
-langchain-google-genai==2.0.10
-langchain-text-splitters==0.3.11
-langsmith==0.4.25
-markdown-it-py==4.0.0
-marshmallow==3.26.1
-mdurl==0.1.2
-multidict==6.6.4
-mypy_extensions==1.1.0
-numpy==2.3.2
-oauthlib==3.3.1
-orjson==3.11.3
-packaging==25.0
-pdfminer.six==20250506
-pdfplumber==0.11.7
-pillow==11.3.0
-pluggy==1.6.0
-propcache==0.3.2
-proto-plus==1.26.1
-protobuf==5.29.5
-pyasn1==0.6.1
-pyasn1_modules==0.4.2
-pycparser==2.22
-pydantic==2.11.7
-pydantic-settings==2.10.1
-pydantic_core==2.33.2
-Pygments==2.19.2
-PyMuPDF==1.26.4
-pyparsing==3.2.3
-PyPDF2==3.0.1
-pypdfium2==4.30.0
-pytest==8.4.2
-python-dotenv==1.1.1
-python-magic==0.4.27
-PyYAML==6.0.2
-referencing==0.36.2
-requests==2.32.5
-requests-oauthlib==2.0.0
-requests-toolbelt==1.0.0
-rpds-py==0.27.1
-rsa==4.9.1
-sniffio==1.3.1
-SQLAlchemy==2.0.43
-tenacity==9.1.2
-tqdm==4.67.1
-typing-inspect==0.9.0
-typing-inspection==0.4.1
-typing_extensions==4.15.0
-uritemplate==4.2.0
-urllib3==2.5.0
-yarl==1.20.1
-zstandard==0.24.0
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
