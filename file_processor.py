@@ -19,6 +19,8 @@ class FileProcessor:
         self.files = []
         self.initial_files_number = 0
         self.verified_files_number = 0
+        self.max_recursion_depth = 3 
+        self.result = {}
 
     def process(self):
         try:
@@ -40,24 +42,22 @@ class FileProcessor:
             raise e
     
     def process_single_pdf(self, file_path: str):
-        result = {}
         self.files.append(file_path)
         self.initial_files_number = 1
         reader = fitz.open(file_path)
         text = ""
         for p in reader:
             text += p.get_text()
-        result[os.path.basename(file_path)] = text
+        self.result[os.path.basename(file_path)] = text
         reader.close()
         self.verified_files_number = 1
-        return result
+        return self.result
 
     def process_zip(self):
-        result = {}
         try:
             with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
                 if len(zip_ref.namelist()) == 0:
-                    return result  # Empty zip file
+                    return self.result  # Empty zip file
                 for file_name in zip_ref.namelist():
                     if file_name.endswith(".pdf"):
                         with zip_ref.open(file_name) as file:
@@ -70,9 +70,9 @@ class FileProcessor:
                                 text = ""
                                 for p in reader:
                                     text += p.get_text()
-                                result[os.path.basename(file_name)] = text
+                                self.result[os.path.basename(file_name)] = text
                                 reader.close()
-                                result[file_name] = text
+                                self.result[file_name] = text
                                 self.verified_files_number += 1
         except zipfile.BadZipFile:
             click.secho(f"Error: The file {self.file_path} is not a valid zip file or is corrupted.", fg="red", err=True)
@@ -80,7 +80,8 @@ class FileProcessor:
         except Exception as e:
             click.secho(f"Error processing zip file {self.file_path}: {e}", fg="red", err=True)
             raise e
-        return result
+        return self.result
 
     def validate_pdf(self, file_path: str) -> bool:
         return magic.from_file(file_path, mime=True) == 'application/pdf'
+    
