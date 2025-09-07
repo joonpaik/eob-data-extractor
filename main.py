@@ -1,4 +1,4 @@
-from cli import main
+from extract_eob import main
 
 
 
