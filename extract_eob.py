@@ -6,12 +6,18 @@ from dotenv import load_dotenv
 from google.auth import default
 import file_processor
 
+"""
+    Python CLI tool to extract Explanantion of Benefits (EOB) details from PDF files.
+    Supports single PDF files or ZIP files containing multiple PDFs.
+    Utilizes Google Generative AI to process and extract relevant information.
+"""
+
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 @click.command()
 @click.option('--file','-f', type=click.Path(exists=True), help='File to process')
 def main(file):
-    print(f"file: {file}")
+
     
     # Initialize the Google Generative AI model
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", 
