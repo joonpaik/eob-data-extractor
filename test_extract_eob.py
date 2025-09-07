@@ -64,7 +64,6 @@ if __name__ == "__main__":
             else:
                 try:
                     output_json = json.loads(result.output)
-                    click.echo(output_json)
                     if output_json and isinstance(output_json, dict) or (test_file == test_unrelated_pdf and isinstance(output_json, dict)):
                         click.echo("Test passed: Valid output received.")
                         correct_tests += 1
