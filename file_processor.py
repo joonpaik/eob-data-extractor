@@ -1,7 +1,7 @@
 import fitz  # PyMuPDF
 from typing import List
 import magic
-import zipfile, os
+import zipfile, os, click
 
 """
     Goal: structure PDF to be in human-readable content
@@ -20,18 +20,24 @@ class FileProcessor:
         self.initial_files_number = 0
         self.verified_files_number = 0
 
-    
     def process(self):
-        # check if file is zip
-        if magic.from_file(self.file_path, mime=True) == 'application/zip':
-            return self.process_zip()
-        
-        # check if it a single pdf
-        elif self.validate_pdf(self.file_path):
-            return self.process_single_pdf(self.file_path)
+        try:
+            # Check for encryption
+            if fitz.open(self.file_path).needs_pass:
+                raise ValueError("The provided file is encrypted and cannot be processed.")
+            
+            # check if file is zip
+            if magic.from_file(self.file_path, mime=True) == 'application/zip':
+                return self.process_zip()
+            
+            # check if it a single pdf
+            elif self.validate_pdf(self.file_path):
+                return self.process_single_pdf(self.file_path)
     
-        else:
-            raise ValueError("Unsupported file type. Please provide a PDF or a ZIP file containing PDFs.")
+            else:
+                raise ValueError("Unsupported file type. Please provide a PDF or a ZIP file containing PDFs.")
+        except Exception as e:
+            raise e
     
     def process_single_pdf(self, file_path: str):
         result = {}
@@ -44,26 +50,22 @@ class FileProcessor:
         result[os.path.basename(file_path)] = text
         reader.close()
         self.verified_files_number = 1
-        print(f"{self.initial_files_number} initially inputted | {self.verified_files_number} verified as valid PDFs for processing")
         return result
-    
+
     def process_zip(self):
         result = {}
-        print(f"Processing zip file: {self.file_path}")
-        with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
-            self.initial_files_number = len(zip_ref.namelist())
-            for file_name in zip_ref.namelist():
-                if file_name.endswith(".pdf"):
-                    print(f"Processing file: {file_name}")
-
-                    try:
+        try:
+            with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
+                if len(zip_ref.namelist()) == 0:
+                    return result  # Empty zip file
+                for file_name in zip_ref.namelist():
+                    if file_name.endswith(".pdf"):
                         with zip_ref.open(file_name) as file:
                             content = file.read()
 
                             is_pdf = magic.from_buffer(content, mime=True) == 'application/pdf'
                             if is_pdf:
-                                print(f"{file_name} Is valid PDF: {is_pdf}")
-
+                                self.initial_files_number += 1
                                 reader = fitz.open(stream=content, filetype="pdf")
                                 text = ""
                                 for p in reader:
@@ -72,8 +74,12 @@ class FileProcessor:
                                 reader.close()
                                 result[file_name] = text
                                 self.verified_files_number += 1
-                    except Exception as e:
-                        print(f"Error processing {file_name}: {e}")
+        except zipfile.BadZipFile:
+            click.secho(f"Error: The file {self.file_path} is not a valid zip file or is corrupted.", fg="red", err=True)
+            raise ValueError("The provided zip file is corrupted or invalid.")     
+        except Exception as e:
+            click.secho(f"Error processing zip file {self.file_path}: {e}", fg="red", err=True)
+            raise e
         return result
 
     def validate_pdf(self, file_path: str) -> bool:
