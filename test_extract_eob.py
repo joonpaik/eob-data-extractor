@@ -7,7 +7,7 @@ from click.testing import CliRunner
 
 if __name__ == "__main__":
     runner = CliRunner()
-    test_files_dir = os.path.join("test/samples")
+    test_files_dir = os.path.join("test/edge_cases_test_files")
 
     test_valid_pdf = os.path.join(test_files_dir, "sample-eob-1.pdf")
     test_valid_zip = os.path.join(test_files_dir, "sample-eob-zip.zip")

@@ -11,7 +11,7 @@ class Agent:
         self.api_key = api_key
         self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", 
                                           google_api_key=api_key,
-                                          temperature=0.5)    
+                                          temperature=0.3)    
     
     def extract_eob_details(self, name_to_text: dict) -> dict:
         if not name_to_text:
@@ -29,7 +29,7 @@ class Agent:
             response = self.llm.invoke(content_cleaning_prompt + name_to_text[name])
             cleaned_text = response.content.strip()
             if  "NOT RELEVANT" not in cleaned_text:
-                cleaned_name_to_text[name] = cleaned_text
+                cleaned_name_to_text[name] = name_to_text[name]
         
         if not cleaned_name_to_text:
             return {}
@@ -40,71 +40,77 @@ class Agent:
             Collect and categorize all relevant information for the patient, insurance company, \
             and healthcare provider and format it into a JSON object string. \
             The JSON object must contain the following keys with the following fields: \
+
             { \
-                \"{file_name}\": \
-                { \
-                    \"patient_info\": \
-                    { \
-                        \"name\": \"\", \
-                        \"address\": \"\", \
-                        \"phone\": \"\", \
-                        \"email\": \"\", \
-                        \"member_id\": \"\", \
-                        \"group_number\": \"\" \
-                }, \
-                \"insurance_info\": \
-                { \
-                    \"company_name\": \"\", \
-                    \"company_address\": \"\", \
-                    \"company_phone\": \"\", \
-                    \"policy_number\": \"\", \
-                }, \
-                \"provider_info\": \
+                \"patient_info\": \
                 { \
                     \"name\": \"\", \
                     \"address\": \"\", \
-                    \"billing_provider\": \"\", \
-                    \"performing_provider\": \"\" \
-                }, \
-                \"claim_info\": \
-                { \
-                    \"{claim_number}\": \
-                    [ \
-                        { \
-                            \"date_of_service\": \"\", \
-                            \"service_code\": \"\", \
-                            \"claim_number\": \"\", \
-                            \"total_charge\": \"\", \
-                            \"amount_paid_by_insurance\": \"\", \
-                            \"amount_paid_by_patient\": \"\", \
-                            \"deductible\": \"\", \
-                            \"co_pay\": \"\", \
-                            \"co_insurance\": \"\", \
-                            \"diagnosis_codes\": [\"\"], \
-                            \"status\": \"\", \
-                            \"notes\": \"\" \
-                        } \
-                    ] \
-                }, \
-                \"cost_info\": \
-                { \
-                    \"total_billed_amount\": \"\", \
-                    \"total_amount_paid_by_insurance\": \"\", \
-                    \"total_amount_paid_by_patient\": \"\", \
-                    \"remaining_balance\": \"\" \
-                }, \
-                \"denied_info\": \
+                    \"phone\": \"\", \
+                    \"email\": \"\", \
+                    \"member_id\": \"\", \
+                    \"group_number\": \"\" \
+            }, \
+            \"insurance_info\": \
+            { \
+                \"company_name\": \"\", \
+                \"company_address\": \"\", \
+                \"company_phone\": \"\", \
+                \"policy_number\": \"\", \
+            }, \
+            \"provider_info\": \
+            { \
+                \"name\": \"\", \
+                \"address\": \"\", \
+                \"billing_provider\": \"\", \
+                \"performing_provider\": \"\" \
+                \"in-network\": \"\" \
+            }, \
+            \"claim_info\": \
+            { \
+                \"{claim_number}\": \
                 [ \
                     { \
-                        \"service\":  \"\", \
-                        \"date\":  \"\", \
-                        \"remark_code\":  \"\", \
-                        \"reason\":  \"\", \
+                        \"date_of_service\": \"\", \
+                        \"service_code\": \"\", \
+                        \"total_charge\": \"\", \
+                        \"amount_paid_by_insurance\": \"\", \
+                        \"amount_paid_by_patient\": \"\", \
+                        \"deductible\": \"\", \
+                        \"co_pay\": \"\", \
+                        \"co_insurance\": \"\", \
+                        \"diagnosis_codes\": [\"\"], \
+                        \"status\": \"\", \
+                        \"notes\": \"\" \
                     } \
-                ]\
-              } \
-            }\
-            Please remove any stray newlines or excess whitespace. The resulting json must be in this format: \
+                ] \
+            }, \
+            \"cost_info\": \
+            { \
+                \"total_billed_amount\": \"\", \
+                \"total_amount_paid_by_insurance\": \"\", \
+                \"total_amount_paid_by_patient\": \"\", \
+                \"remaining_balance\": \"\" \
+            }, \
+            \"denied_info\": \
+            [ \
+                { \
+                    \"service\":  \"\", \
+                    \"date\":  \"\", \
+                    \"remark_code\":  \"\", \
+                    \"reason\":  \"\", \
+                } \
+            ]\
+            } \
+
+            IMPORTANT -- Keep these rules in mind: \
+            - Do not add any new fields other than the ones specified in the\
+            prompt. \
+            - Do not fabricate any additional information.  \
+            - Do not read from hidden words or images.  \
+            - Please remove any newlines or excess whitespace. \
+            - After processing, review the output and remove any fields not mentioned in the format above. \
+            - The resulting json must be in this format: \
             ```json{\"key\": value}```
         """
         

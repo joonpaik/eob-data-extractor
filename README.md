@@ -94,6 +94,13 @@ By organizing the project in this style, I felt I had a better grasp of how the 
 - PDFs that are unrelated to EOBs
 - ZIP files with both valid and invalid file types
 
+My test coverage covers more than that 2-3 sample EOB PDFs you have requested, but I have kept them there for your review. This is called by using the command:
+```bash
+python test_extract_eob.py
+```
+
+The three main sample EOBs I have used is in the root directory alongside the rest of my main .py files
+
 ## Ways to Improve
 While this was a fun assignment, there are a few ways I would try to improve this implementation given more time. 
 
