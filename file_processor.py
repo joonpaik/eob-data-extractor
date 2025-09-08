@@ -1,7 +1,7 @@
 import fitz  # PyMuPDF
 from typing import List
 import magic
-import zipfile, os, click
+import zipfile, os, click, tempfile, shutil
 
 """
     Goal: structure PDF to be in human-readable content
@@ -21,6 +21,9 @@ class FileProcessor:
         self.verified_files_number = 0
         self.max_recursion_depth = 3 
         self.result = {}
+        self.temp_dirs: List[str] = []
+
+
 
     def process(self):
         try:
@@ -51,7 +54,7 @@ class FileProcessor:
         self.result[os.path.basename(file_path)] = text
         reader.close()
         self.verified_files_number = 1
-        return self.result
+        return self.result    
 
     def process_zip(self):
         try:
