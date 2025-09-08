@@ -24,7 +24,6 @@ class FileProcessor:
         self.temp_dirs: List[str] = []
 
 
-
     def process(self):
         try:
             # Check for encryption

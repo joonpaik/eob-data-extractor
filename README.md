@@ -104,11 +104,9 @@ The three main sample EOBs I have used is in the root directory alongside the re
 ## Ways to Improve
 While this was a fun assignment, there are a few ways I would try to improve this implementation given more time. 
 
-First, I would like to implement a retry mechanism. It is not guarenteed that the agent will output all the information correctly the first time, but if I could implement a dynamic prompt specification function, this tool would be greatly improved
+First, I would like to improve the retry mechanism. While this implementation is sufficient for low-scale processing, scalability is an important aspect to consider in a growing company like Onehots Labs. Furthermore, another way to improve the retry mechanism is if I could implement a dynamic prompt specification function. This would require a bit more time to properly flesh out, but the potential is there.
 
-Second, I would like to have handled nested directories and nested ZIP files. I made the assumption that the input would not be this scenario, but it is an important edge case to consider.
-
-Third, I would like to implement better handling on the API calls to Gemini Flash. While this implementation is sufficiently for low-scale processing, scalability is an important aspect to consider in a growing company like Onehots Labs.
+I would also like to have handled nested directories and nested ZIP files better. I made the assumption that the input would not be this scenario, but it is an important edge case to consider. Being able to search nested directories will lead to a more robust CLI tool and allow more flexibility in how Onehot Labs organizes the extracted data.
 
 
 # Output Format

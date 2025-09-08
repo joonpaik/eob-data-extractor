@@ -1,19 +1,55 @@
 import click
+from unittest.mock import Mock
 from langchain_google_genai import ChatGoogleGenerativeAI
-import pathlib
-import os, json, httpx, pathlib, re, sys
+from google.api_core import exceptions
+import os, json, httpx, pathlib, re, sys, time
 from dotenv import load_dotenv
 from google.auth import default
-import file_processor
 
 class Agent:
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", 
                                           google_api_key=api_key,
-                                          temperature=0.3)    
-    
+                                          temperature=0.3)   
+
+    def test_llm(self, prompt: str):
+        org_llm = self.llm
+        test_llm = Mock()
+        mock_response = Mock()
+        mock_response.content = "Test successful"
+
+        test_llm.invoke.side_effect = [
+            exceptions.ResourceExhausted("Quota exceeded"),
+            exceptions.ResourceExhausted("Quota exceeded"),
+            mock_response
+        ]
+        self.llm = test_llm
+        test_result = self.api_call_retry("test")
+        self.llm = org_llm
+
+    def api_call_retry(self, prompt: str, max_retries: int = 3, delay: float = 1.0):
+        last_attempt = None
+        for attempt in range(max_retries):
+            try:
+                response = self.llm.invoke(prompt)
+                return response
+            
+            except exceptions.ResourceExhausted as e:
+                if attempt == max_retries - 1:
+                    raise e
+                d = delay * (2 ** attempt)
+                time.sleep(d)
+            
+            except httpx.HTTPError as e:
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                else:
+                    raise e
+        raise Exception("All retries exhausted")
     def extract_eob_details(self, name_to_text: dict) -> dict:
+        self.test_llm("test")
+
         if not name_to_text:
             return {}
         
@@ -26,10 +62,14 @@ class Agent:
             if it is relevant, return the text as is. Here is the content: \n\n"
         cleaned_name_to_text = {}
         for name in name_to_text:
-            response = self.llm.invoke(content_cleaning_prompt + name_to_text[name])
-            cleaned_text = response.content.strip()
-            if  "NOT RELEVANT" not in cleaned_text:
-                cleaned_name_to_text[name] = name_to_text[name]
+            try:
+                # response = self.llm.invoke(content_cleaning_prompt + name_to_text[name])
+                response = self.api_call_retry(content_cleaning_prompt + name_to_text[name])
+                cleaned_text = response.content.strip()
+                if  "NOT RELEVANT" not in cleaned_text:
+                    cleaned_name_to_text[name] = name_to_text[name]
+            except Exception as e:
+                continue
         
         if not cleaned_name_to_text:
             return {}
@@ -116,8 +156,10 @@ class Agent:
         
         extracted_details = {}
         for name in cleaned_name_to_text:
-            response = self.llm.invoke(extraction_prompt + cleaned_name_to_text[name])
+            # response = self.llm.invoke(extraction_prompt + cleaned_name_to_text[name])
             try:
+                response = self.api_call_retry(extraction_prompt + cleaned_name_to_text[name])
+                
                 # Attempt to parse the response as JSON
                 match = re.search(r'```json\s*\n?(.*?)\n?```', response.content, re.DOTALL)
                 formatted_response = match.group(1) if match else "{}"
